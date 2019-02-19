@@ -1,5 +1,6 @@
 \documentclass[12pt, a4paper]{report}
 \usepackage{graphicx}
+\usepackage{float}
 \usepackage{hyperref}
 \usepackage[left=1in, right=1in, top=1in]{geometry}
 \title{Coursera Capstone Project - Week 5\\ \textbf{Finding US cities similar to Phoenix} }
@@ -19,7 +20,7 @@
 	
 	More specifically, \textit{what cities in the US are similar to Phoenix in terms of venues}? 
 
-\newpage
+
 
 \section*{Description of the data}
 I will be using data from two different sources for this project - Foursquare and the US Cities Dataset. The Foursquare API provides data about the venues whereas the US Cities Dataset provides city names and location coordinates. 
@@ -49,21 +50,30 @@ I will be using the following columns from this dataset:
 	\item Rank
 	\item Coordinates 
 \end{enumerate}
-\newpage
 
 \section*{Methodology}	
 The implementation involves three main phases - pre-processing, clustering, and PCA. Each phase has it's own set of plots and other visualizations. 
 \subsection*{Pre-processing}
 We start by importing the US cities dataset obtained from opendatasoft.com. We read the CSV file into a pandas dataframe. It contains details about 1000 cities in the United States. In order to simplify plots and to make sure we don't exceed the free API usage limit, I only select the top 50 cities based on population. 
 
-\begin{figure}[h]
+\begin{figure}[H]
 \includegraphics[]{cities_data}
 \caption{Cities Data}
 \end{figure}
 
 Next, I use the latitude and longitude of each city to obtain the nearby venues using the Foursquare API. I obtain the top 10 venues for each city and extract the name and category of each venue. I store these in a list that is later converted to a dataframe. 
 
+\begin{figure}[H]
+	\includegraphics[]{foursquaredata}
+	\caption{Data obtained form the Foursquare API}
+\end{figure}
+
 In order to process this categorical data, I one-hot encode the venue categories so that each category is represented as a column. I take the mean of this dataframe to ensure that each category value represents the fraction of the venues that belong to that category for that city. 
+
+\begin{figure}[H]
+	\includegraphics[width=500px]{one-hot}
+	\caption{One-Hot encoded data}
+\end{figure}
 
 \subsection*{Clustering}
 In order to identify similar cities, we must cluster the data. Our target here is Phoenix, so we'll be looking for cities that are assigned the same label is Phoenix. 
@@ -72,12 +82,36 @@ I start by importing Kmeans from the scikit-learn package. I cluster the one-hot
 
 The kmeans labels are stored in the dataframe along with the one-hot values. 
 
+\begin{figure}[H]
+	\includegraphics[]{cities}
+	\caption{Cities similar to Phoenix}
+\end{figure}
+
 \subsection*{PCA}
+In order to better understand the similarity between the one-hot encoded cities, we perform PCA to reduce the dimensionality of the data to 2-dimensional. Therefore, we're able to visualize the similarity between. 
+
+In order to perform PCA, I've used the scikit-learn package once again. I have visualized the PCA transformed data using matplotlib in the form of a scatter plot.
+
+\begin{figure}[H]
+	\includegraphics[]{pca}
+	\caption{PCA Results}
+\end{figure}
+
 
 \section*{Results}
+The results include a list of cities that are similar to Phoenix. They're visualized using Folium on a map. The intra-cluster similarity is also evident from the proximity of the points within a cluster in the PCA plot. 
+
+\begin{figure}[H]
+	\includegraphics[width=500px]{map}
+	\caption{Folium Plot. Cities similar to Phoenix are marked in red. }
+\end{figure}
 
 \section*{Discussion}
+It is worth noting that tweaking certain variable could have a significant impact on the result. For instance, I've only selected the top 10 venues for each city. However, changing this number to 50 or 100 can lead to a difference in cluster patterns. However, with more venues, the number of categories grows too, make clustering less effective due to the curse of dimensionality. 
+
+Similarly, the results depend on the radius of search for the venues. Many cities are surrounded by suburbs, and not all cities are the same size, therefore, affecting the top venues. 
 
 \section*{Conclusion}
+We can see how we can utilize location data to identify cities that are similar in terms of popular venues. This information can reveal interesting patterns and help identify cities that are culturally similar to each other. 
 
 \end{document}
